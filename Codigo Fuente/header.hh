@@ -23,12 +23,14 @@ struct Camion
 {
     int numero_camion;
     float capacidad;
+    vector<vector<Cliente>> ruta;
 };
 
 vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam, float &cap_tra, int &n_cli);
 vector<vector<float>> euclideanMatrix(vector<Cliente> );
 void show_matrix(vector<vector<float>>);
-vector<vector<float>> dijMatrix(vector<vector<float>>, vector<Cliente> , int );
 int getIndex(vector<float> , float );
-void allseeds(vector<vector<float>> Costos, vector<int> &seeds);
-float sumcolumna(vector<vector<float>> matrizDistancesSeed, int column );
+void rutas(vector<Cliente> clientes, vector<Cliente> &vc, vector<Cliente> &tc);
+void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones);
+Cliente select_random_int(vector<Cliente> );
+void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> vc, vector<Cliente> tc, vector<Cliente> clientes);

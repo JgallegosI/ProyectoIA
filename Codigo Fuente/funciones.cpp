@@ -1,4 +1,3 @@
-
 #include"header.hh"
 
 vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam, float &cap_tra, int &n_cli){
@@ -51,44 +50,6 @@ vector<vector<float>> euclideanMatrix(vector<Cliente> clientes){
     
 }
 
-vector<vector<float>> dijMatrix(vector<vector<float>> Costos, vector<Cliente> clientes, int n_cam){
-    vector<Cliente> sj;
-    vector<float> costos_aux;
-    vector<vector<float>> Costos_copia = Costos;
-    sort(Costos_copia[0].begin(),Costos_copia[0].end(),greater<float>());
-
-    for (auto  x : Costos_copia[0]){
-        costos_aux.push_back(x);
-    }
-
-    vector<int> seeds;
-    seeds.push_back(0);
-    int p = getIndex(Costos[0],costos_aux[0]);
-    seeds.push_back(p);
-
-
-    for (int i = 1; i < n_cam; i++)
-    {
-        allseeds(Costos,seeds);
-    }
-    
-   
-    vector<vector<float>> dij;
-
-    seeds.erase(seeds.begin());
-    for (int i = 0; i < Costos[1].size(); i++)
-    {   
-        vector<float> aux;
-        for (auto x : seeds){
-            
-                float dij_aux = Costos[0][i] + Costos[i][x] - Costos[0][x];
-                aux.push_back(dij_aux);
-        }
-        dij.push_back(aux);
-    }
-    
-    return  dij;
-}
 
 void show_matrix(vector<vector<float>> matrix){
     for (int i = 0; i < matrix.size() ; i++)
@@ -116,41 +77,53 @@ int getIndex(vector<float> v, float K)
     }
 }
 
-void allseeds(vector<vector<float>> Costos, vector<int> &seeds){
-    vector<vector<float>> newdistance;
-    for(auto x : seeds){
-        newdistance.push_back(Costos[x]);
-    }
-    
-    vector<float> maxsum;
-    for (int i = 0; i < newdistance[0].size(); i++)
+void rutas(vector<Cliente> clientes, vector<Cliente> &vc, vector<Cliente> &tc){
+    for (auto x: clientes)
     {
-        float sum = sumcolumna(newdistance, i);
-        maxsum.push_back(sum);
-
+        if (x.tipo_cliente==0)
+        {
+            vc.push_back(x);
+        }else
+        {
+            tc.push_back(x);
+        }    
     }
-    float max_seed_dist = *max_element(maxsum.begin(), maxsum.end());
-    vector<float> ms_aux = maxsum;
-    sort(maxsum.begin(),maxsum.end(),greater<float>());
+    
+}
 
-    for(auto x : maxsum){
-        int n = getIndex(ms_aux, x);
-        if(find(seeds.begin(), seeds.end(), n) == seeds.end()){
-             seeds.push_back(n);
-             break;
+void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
+    for (int i = 0; i < n_camiones; i++)
+    {
+        Camion x;
+        x.numero_camion=i;
+        x.capacidad=capacidad;
+        camiones.push_back(x);
+    }
+    
+}
+
+void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> vc, vector<Cliente> tc, vector<Cliente> clientes){
+    
+    vector<Cliente> vc1=vc;
+    vc1.erase(std::find(vc1.begin(),vc1.end(),clientes[0]));
+    for (auto camion:camiones)
+    {
+        camion.ruta[0].push_back(clientes[0]);
+
+        while (camion.capacidad >=0)
+        {
+            Cliente cli= select_random_int(vc1);
+            camion.capacidad = camion.capacidad - cli.demanda;
+            vc1.erase(std::find(vc1.begin(),vc1.end(),cli));
         }
+        camion.ruta[0].push_back(clientes[0]);
     }
     
-   
-    
 }
 
-float sumcolumna(vector<vector<float>> matrizDistancesSeed, int column ){
-  float sum=0.0;
-  for (int i=0;i<matrizDistancesSeed.size();i++){
-    sum += matrizDistancesSeed[i][column];
-  }
-  return sum;
-
+Cliente select_random_int(vector<Cliente> v){
+    int random = rand() % v.size();
+    Cliente sel_elem = v[random];
+    return sel_elem;
 }
-//
+
