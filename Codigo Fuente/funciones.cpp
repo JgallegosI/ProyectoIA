@@ -64,17 +64,17 @@ void show_matrix(vector<vector<float>> matrix){
     }
 }
 
-int getIndex(vector<float> v, float K)
+int getIndex(vector<Cliente> v, Cliente K)
 {
-    auto it = find(v.begin(), v.end(), K);
-    if (it != v.end()) 
+    for (int i = 0; i < v.size(); i++)
     {
-        int index = it - v.begin();
-        return index;
+        if (v[i].numero_cliente == K.numero_cliente)
+        {
+            return i;
+        }
+        
     }
-    else {
-        return -1;
-    }
+    return -1;
 }
 
 void rutas(vector<Cliente> clientes, vector<Cliente> &vc, vector<Cliente> &tc){
@@ -102,28 +102,55 @@ void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
     
 }
 
-void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> vc, vector<Cliente> tc, vector<Cliente> clientes){
-    
-    vector<Cliente> vc1=vc;
-    vc1.erase(std::find(vc1.begin(),vc1.end(),clientes[0]));
-    for (auto camion:camiones)
-    {
-        camion.ruta[0].push_back(clientes[0]);
+void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
+    srand(time(NULL));
+    cout<<"entre"<<endl;
+    vc.erase(vc.begin()+0);
+    for (auto &camion:camiones)
+    {   
+        if(vc.size()>0){
+        cout<<"Camion"<<endl;
+        vector<Cliente> aux;
+        aux.push_back(clientes[0]);
 
-        while (camion.capacidad >=0)
+        while ((camion.capacidad >=0)&&(vc.size()>0))
         {
-            Cliente cli= select_random_int(vc1);
+            
+            Cliente cli= select_random_int(vc);
             camion.capacidad = camion.capacidad - cli.demanda;
-            vc1.erase(std::find(vc1.begin(),vc1.end(),cli));
+            cout<<cli.numero_cliente<<endl;
+            aux.push_back(cli);
+            vc.erase(vc.begin()+getIndex(vc,cli)); 
         }
-        camion.ruta[0].push_back(clientes[0]);
+        aux.push_back(clientes[0]);
+        vector<vector<Cliente>> aux2;
+        aux2.push_back(aux);
+        camion.ruta=aux2;
+        }
     }
     
 }
 
 Cliente select_random_int(vector<Cliente> v){
-    int random = rand() % v.size();
+    cout<<"Calculo random"<<endl;
+    cout<<v.size()<<endl;
+    unsigned int random = rand() % v.size();
     Cliente sel_elem = v[random];
     return sel_elem;
 }
 
+int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc){
+    float min = INFINITY;
+    int vecino;
+    for (auto n:tc){
+        if (n.numero_cliente != i){
+            if (min < costos[i][n.numero_cliente])
+            {
+                min = costos[i][n.numero_cliente];
+                vecino = n.numero_cliente;
+            }
+        }
+    }
+
+    return vecino;
+}
