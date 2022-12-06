@@ -104,12 +104,13 @@ void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
 
 void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
     srand(time(NULL));
-    cout<<"entre"<<endl;
     vc.erase(vc.begin()+0);
     for (auto &camion:camiones)
     {   
+        
+        if (camion.capacidad>=0)
+        {
         if(vc.size()>0){
-        cout<<"Camion"<<endl;
         vector<Cliente> aux;
         aux.push_back(clientes[0]);
 
@@ -118,22 +119,30 @@ void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<
             
             Cliente cli= select_random_int(vc);
             camion.capacidad = camion.capacidad - cli.demanda;
-            cout<<cli.numero_cliente<<endl;
-            aux.push_back(cli);
-            vc.erase(vc.begin()+getIndex(vc,cli)); 
+            if (camion.capacidad>=0)
+            {
+                aux.push_back(cli);
+                vc.erase(vc.begin()+getIndex(vc,cli));
+            }else
+            {   
+                camion.capacidad = camion.capacidad + cli.demanda;
+                cout<<"Capacidad sin trailer "<<camion.capacidad<<" Camion "<<camion.numero_camion<<endl;
+                break;
+            }
+             
         }
         aux.push_back(clientes[0]);
         vector<vector<Cliente>> aux2;
         aux2.push_back(aux);
         camion.ruta=aux2;
         }
+        }
     }
-    
 }
 
+
+
 Cliente select_random_int(vector<Cliente> v){
-    cout<<"Calculo random"<<endl;
-    cout<<v.size()<<endl;
     unsigned int random = rand() % v.size();
     Cliente sel_elem = v[random];
     return sel_elem;
@@ -153,4 +162,95 @@ int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc){
     }
 
     return vecino;
+}
+float check_peso(Camion camion){
+    float peso = 0;
+    for (auto x:camion.ruta)
+    {
+        for (auto y:x)
+        {
+            peso = peso + y.demanda;
+        }
+        
+    }
+    return peso;
+}
+
+void suma_peso(vector<Camion> &camion){
+    for (auto &x:camion)
+    {
+        x.peso = check_peso(x);
+    }
+
+}
+
+void sort_camiones_max(vector<Camion> &camiones){
+    sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.capacidad > b.capacidad; });
+}
+
+void sort_camiones_min(vector<Camion> &camiones){
+    sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.capacidad < b.capacidad; });
+}
+
+void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap_cam){
+    for (auto &x:camiones)
+    {
+        if ((can_tra>0))
+        {   
+            x.trailer=true;
+            x.capacidad = x.capacidad + cap_tra;
+            can_tra --;
+        }
+        
+        
+    }
+    
+}
+
+void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
+    srand(time(NULL));
+    for (auto &camion:camiones)
+    {   
+        cout<<"Capacidad con trailer: "<<camion.capacidad<< "\tCamion: "<< camion.numero_camion <<endl;
+        if (camion.capacidad>=0)
+        {
+        if(vc.size()>0){
+
+        while ((camion.capacidad >=0)&&(vc.size()>0))
+        {
+            
+            Cliente cli= select_random_int(vc);
+            camion.capacidad = camion.capacidad - cli.demanda;
+            if (camion.capacidad>=0)
+            {
+                camion.ruta[0].insert(camion.ruta[0].begin()+camion.ruta[0].size()-2,cli);
+                vc.erase(vc.begin()+getIndex(vc,cli));
+            }else
+            {   
+                camion.capacidad = camion.capacidad + cli.demanda;
+                break;
+            }
+             
+        }
+        }
+        }
+    }
+}
+void show_camiones(vector<Camion> camiones){
+    for (auto x:camiones)
+    {
+        cout<<"Camion: "<<x.numero_camion<<endl;
+        for (auto y:x.ruta)
+        {
+            for (auto z:y)
+            {
+                cout<<z.numero_cliente<<" ";
+            }
+            cout<<endl;
+        }
+        cout<<"Peso: "<<x.peso<<endl;
+        cout<<"Capacidad: "<<x.capacidad<<endl;
+        cout<<endl;
+    }
+    
 }

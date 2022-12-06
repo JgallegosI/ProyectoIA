@@ -19,23 +19,24 @@ int main(int argc, char const *argv[])
     vector<Cliente> vc;
     vector<Cliente> tc;
     rutas(clientes,vc,tc);
+    cout<<vc.size()<<endl;
+    cout<<tc.size()<<endl;
     mainRouteWohutTrailer(camiones,vc,clientes);
-    cout<<"Rutas"<<endl;
-    for (auto x:camiones)
+    suma_peso(camiones);
+    cout<<"Rutas sin trailer"<<endl;
+    show_camiones(camiones);
+    sort_camiones_min(camiones);
+    if (vc.empty()==false)
     {
+        cout<<"No se pudo asignar todos los clientes"<<endl;
+        add_trailer(camiones,can_tra,cap_tra,cap_cam);
+        mainRouteWithTrailer(camiones,vc,clientes);
+        suma_peso(camiones);
+        cout<<"Rutas con trailer"<<endl;
+        show_camiones(camiones);
 
-            for (int i = 0; i < x.ruta.size() ; i++)
-        {
-        for (int j = 0; j < x.ruta[i].size(); j++)
-        {
-            cout<< x.ruta[i][j].numero_cliente << "\t";
-        }
-            
-        // Newline for new row
-        cout << endl;
-        }
-    
     }
+    
     cout<<"Cliente sin asignar a ruta"<<endl;
     for (auto x:vc){
         cout<<x.numero_cliente<<endl;
