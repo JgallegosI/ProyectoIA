@@ -3,6 +3,7 @@
 
 int main(int argc, char const *argv[])
 {
+    srand(time(NULL));
     int can_cam;
     int can_tra;
     float cap_cam;
@@ -20,27 +21,52 @@ int main(int argc, char const *argv[])
     vector<Cliente> tc;
     rutas(clientes,vc,tc);
     cout<<vc.size()<<endl;
+    show_clientes(vc);
     cout<<tc.size()<<endl;
+    show_clientes(tc);
     mainRouteWohutTrailer(camiones,vc,clientes);
-    suma_peso(camiones);
-    cout<<"Rutas sin trailer"<<endl;
-    show_camiones(camiones);
-    sort_camiones_min(camiones);
+    suma_peso(camiones);    
     if (vc.empty()==false)
     {
-        cout<<"No se pudo asignar todos los clientes"<<endl;
+        sort_camiones_min(camiones);
         add_trailer(camiones,can_tra,cap_tra,cap_cam);
+        sort_camiones_max(camiones);
         mainRouteWithTrailer(camiones,vc,clientes);
         suma_peso(camiones);
-        cout<<"Rutas con trailer"<<endl;
+        
+        
+        cout<<"Cliente tc por asignar a ruta"<<endl;
+        sort_clientes_tc_max(tc);
+        cout<<endl;
+        sort_camiones_max(camiones);
+        
+        mainRouteWithTc(camiones,tc,clientes);
+        
+        add_trailer(camiones,can_tra,cap_tra,cap_cam);
+        subtour(camiones,costs,tc);
+        cout<<"Rutas finales"<<endl;
         show_camiones(camiones);
+    }else{
+        cout<<"Se asignaron todos los clientes vc"<<endl;
+        cout<<"Cliente tc por asignar a ruta"<<endl;
+        sort_clientes_tc_max(tc);
+        show_clientes(tc);
+        cout<<endl;
+        sort_camiones_max(camiones);
+        show_camiones(camiones);
+        mainRouteWithTc(camiones,tc,clientes);
 
+        if (tc.empty()==false)
+        {
+            add_trailer(camiones,can_tra,cap_tra,cap_cam);
+            subtour(camiones,costs,tc);
+        }
+        
+        cout<<"Rutas finales"<<endl;
+        show_camiones(camiones);
     }
     
-    cout<<"Cliente sin asignar a ruta"<<endl;
-    for (auto x:vc){
-        cout<<x.numero_cliente<<endl;
-    }
+    
     
     return 0;
 }

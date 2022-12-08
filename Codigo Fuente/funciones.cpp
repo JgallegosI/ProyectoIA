@@ -103,7 +103,6 @@ void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
 }
 
 void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
-    srand(time(NULL));
     vc.erase(vc.begin()+0);
     for (auto &camion:camiones)
     {   
@@ -197,7 +196,7 @@ void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap
     {
         if ((can_tra>0))
         {   
-            x.trailer=true;
+            x.trailer=1;
             x.capacidad = x.capacidad + cap_tra;
             can_tra --;
         }
@@ -208,10 +207,8 @@ void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap
 }
 
 void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
-    srand(time(NULL));
     for (auto &camion:camiones)
     {   
-        cout<<"Capacidad con trailer: "<<camion.capacidad<< "\tCamion: "<< camion.numero_camion <<endl;
         if (camion.capacidad>=0)
         {
         if(vc.size()>0){
@@ -250,7 +247,144 @@ void show_camiones(vector<Camion> camiones){
         }
         cout<<"Peso: "<<x.peso<<endl;
         cout<<"Capacidad: "<<x.capacidad<<endl;
+        cout<<"Trailer: "<<x.trailer<<endl;
         cout<<endl;
     }
     
 }
+
+void mainRouteWithTc(vector<Camion> &camiones, vector<Cliente> &tc,vector<Cliente> clientes){ // ahora tengo agregado los clientes tc a los camiones sin trailer
+    for(auto &camion:camiones){
+        if ((camion.capacidad>0) && (camion.trailer == 0) && (camion.ruta.size()>0))
+        {
+            if (tc.size()>0)
+            {
+                while ((camion.capacidad >=0)&&(tc.size()>0))
+                {
+                    Cliente cli= tc.back();
+                    camion.capacidad = camion.capacidad - cli.demanda;
+                    if (camion.capacidad>=0)
+                    {
+                        camion.ruta[0].insert(camion.ruta[0].begin()+camion.ruta[0].size()-1,cli);
+                        tc.erase(tc.begin()+getIndex(tc,cli));
+                    }else
+                    {   
+                        camion.capacidad = camion.capacidad + cli.demanda;
+                        break;
+                    }
+                    
+                }
+            }
+            
+        }else if ((camion.peso==0) && (camion.trailer == 0))
+        {
+        vector<Cliente> aux;
+        aux.push_back(clientes[0]);
+
+        while ((camion.capacidad >=0)&&(tc.size()>0))
+        {
+            
+            Cliente cli= select_random_int(tc);
+            camion.capacidad = camion.capacidad - cli.demanda;
+            if (camion.capacidad>=0)
+            {
+                aux.push_back(cli);
+                tc.erase(tc.begin()+getIndex(tc,cli));
+            }else
+            {   
+                camion.capacidad = camion.capacidad + cli.demanda;
+                break;
+            }
+             
+        }
+        aux.push_back(clientes[0]);
+        vector<vector<Cliente>> aux2;
+        aux2.push_back(aux);
+        camion.ruta=aux2;
+        }
+        
+        
+    }
+}
+
+void sort_clientes_tc_max(vector<Cliente> &tc){
+    sort(tc.begin(), tc.end(), [](Cliente a, Cliente b) { return a.demanda > b.demanda; });
+}
+
+void show_clientes(vector<Cliente> clientes){
+    for (auto x:clientes)
+    {
+        cout<<x.numero_cliente<<" ";
+    }
+    cout<<endl;
+    
+}
+
+void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Cliente> &tc){
+    for (auto &x:camiones)
+    {
+        if ((x.capacidad>=0)&&(x.trailer==1))
+        {
+            if (tc.size()!=0)
+            {
+                vector<Cliente> camiones_aux;
+                Cliente cli= tc.back(); 
+                x.capacidad = x.capacidad - cli.demanda;
+                int position = most_near_client(x.ruta[0],costos,cli);
+                if (position == 0)
+                {
+                    position = 1;
+                }
+                x.ruta[0].insert(x.ruta[0].begin()+position,cli);
+                tc.pop_back();
+                if((x.capacidad>=0)&&(tc.size()!=0)){
+                camiones_aux.push_back(cli);
+                int i=0;
+                while ((x.capacidad >=0)&&(tc.size()!=0)&&(i<5))
+                {
+                    Cliente cli= tc.back();
+                    x.capacidad = x.capacidad - cli.demanda;    
+                    if (x.capacidad>=0)
+                    {
+                        camiones_aux.push_back(cli);
+                        tc.pop_back();
+                        i++;
+                    }else
+                    {   
+                        x.capacidad = x.capacidad + cli.demanda;
+                        break;
+                    }
+                    
+                }
+                camiones_aux.push_back(camiones_aux[0]);
+                x.ruta.push_back(camiones_aux);
+                }
+                else{
+                    x.capacidad = x.capacidad + cli.demanda;
+                }
+        
+            }
+            
+        }
+        
+    }
+    
+}
+
+int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli){
+    int index = 0;
+    float min = 999999999;
+    for (int i = 0; i < clientes.size(); i++)
+    {
+        if (costos[cli.numero_cliente][clientes[i].numero_cliente]<min)
+        {
+            min = costos[cli.numero_cliente][clientes[i].numero_cliente];
+            index = i;
+        }
+        
+    }
+    return index;
+}
+
+
+// Hill CLimmbing con Mejor Mejora

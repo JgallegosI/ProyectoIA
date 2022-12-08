@@ -27,7 +27,7 @@ struct Camion
     float capacidad;
     float peso;
     vector<vector<Cliente>> ruta;
-    bool trailer;
+    int trailer=0;
 };
 
 vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam, float &cap_tra, int &n_cli);
@@ -46,3 +46,8 @@ void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap
 void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes);
 void sort_camiones_min(vector<Camion> &camiones);
 void show_camiones(vector<Camion> camiones);
+void mainRouteWithTc(vector<Camion> &camiones,vector<Cliente> &tc, vector<Cliente> clientes);
+void sort_clientes_tc_max(vector<Cliente> &tc);
+void show_clientes(vector<Cliente> clientes);
+void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Cliente> &tc);
+int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli);
