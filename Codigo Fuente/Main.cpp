@@ -20,10 +20,7 @@ int main(int argc, char const *argv[])
     vector<Cliente> vc;
     vector<Cliente> tc;
     rutas(clientes,vc,tc);
-    cout<<vc.size()<<endl;
-    show_clientes(vc);
-    cout<<tc.size()<<endl;
-    show_clientes(tc);
+    
     mainRouteWohutTrailer(camiones,vc,clientes);
     suma_peso(camiones, cap_cam, cap_tra);    
     if (vc.empty()==false)
@@ -34,10 +31,10 @@ int main(int argc, char const *argv[])
         suma_peso(camiones, cap_cam, cap_tra); 
         
         
-        cout<<"Cliente tc por asignar a subruta"<<endl;
+        
         sort_clientes_tc_max(tc);
-        show_clientes(tc);
-        cout<<endl;
+        
+        
         suma_peso(camiones, cap_cam, cap_tra); 
         sort_camiones_max(camiones);
         if (tc.empty()==false)
@@ -47,8 +44,7 @@ int main(int argc, char const *argv[])
             sort_camiones_max(camiones);
             if (tc.empty()==false)
             {
-                cout<<"Cliente tc no factibles"<<endl;
-                show_clientes(tc);
+                
                 add_client_tc(camiones,tc,costs);
                 suma_peso(camiones, cap_cam, cap_tra); 
             }
@@ -58,13 +54,12 @@ int main(int argc, char const *argv[])
         cout<<"Rutas finales"<<endl;
         show_camiones(camiones);
     }else{
-        cout<<"Se asignaron todos los clientes vc"<<endl;
-        cout<<"Cliente tc por asignar a ruta"<<endl;
+        
         sort_clientes_tc_max(tc);
-        show_clientes(tc);
+        
         cout<<endl;
         sort_camiones_max(camiones);
-        show_camiones(camiones);
+        
         mainRouteWithTc(camiones,tc,clientes);
         suma_peso(camiones, cap_cam, cap_tra);
         if (tc.empty()==false)
@@ -74,8 +69,8 @@ int main(int argc, char const *argv[])
             suma_peso(camiones, cap_cam, cap_tra); 
             if (tc.empty()==false)
             {   
-                cout<<"Cliente tc no factibles"<<endl;
-                show_clientes(tc);
+                
+                
                 add_client_tc(camiones,tc,costs);
                 suma_peso(camiones, cap_cam, cap_tra); 
             }
