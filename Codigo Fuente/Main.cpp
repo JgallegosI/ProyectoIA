@@ -25,25 +25,36 @@ int main(int argc, char const *argv[])
     cout<<tc.size()<<endl;
     show_clientes(tc);
     mainRouteWohutTrailer(camiones,vc,clientes);
-    suma_peso(camiones);    
+    suma_peso(camiones, cap_cam, cap_tra);    
     if (vc.empty()==false)
     {
         sort_camiones_min(camiones);
         add_trailer(camiones,can_tra,cap_tra,cap_cam);
         sort_camiones_max(camiones);
-        mainRouteWithTrailer(camiones,vc,clientes);
-        suma_peso(camiones);
+        suma_peso(camiones, cap_cam, cap_tra); 
         
         
-        cout<<"Cliente tc por asignar a ruta"<<endl;
+        cout<<"Cliente tc por asignar a subruta"<<endl;
         sort_clientes_tc_max(tc);
+        show_clientes(tc);
         cout<<endl;
+        suma_peso(camiones, cap_cam, cap_tra); 
         sort_camiones_max(camiones);
-        
-        mainRouteWithTc(camiones,tc,clientes);
-        
-        add_trailer(camiones,can_tra,cap_tra,cap_cam);
-        subtour(camiones,costs,tc);
+        if (tc.empty()==false)
+        {
+            subtour(camiones,costs,tc);
+            suma_peso(camiones, cap_cam, cap_tra); 
+            sort_camiones_max(camiones);
+            if (tc.empty()==false)
+            {
+                cout<<"Cliente tc no factibles"<<endl;
+                show_clientes(tc);
+                add_client_tc(camiones,tc,costs);
+                suma_peso(camiones, cap_cam, cap_tra); 
+            }
+            
+        }
+        sort_camiones_by_number(camiones);
         cout<<"Rutas finales"<<endl;
         show_camiones(camiones);
     }else{
@@ -55,14 +66,26 @@ int main(int argc, char const *argv[])
         sort_camiones_max(camiones);
         show_camiones(camiones);
         mainRouteWithTc(camiones,tc,clientes);
-
+        suma_peso(camiones, cap_cam, cap_tra);
         if (tc.empty()==false)
-        {
+        {   
             add_trailer(camiones,can_tra,cap_tra,cap_cam);
             subtour(camiones,costs,tc);
+            suma_peso(camiones, cap_cam, cap_tra); 
+            if (tc.empty()==false)
+            {   
+                cout<<"Cliente tc no factibles"<<endl;
+                show_clientes(tc);
+                add_client_tc(camiones,tc,costs);
+                suma_peso(camiones, cap_cam, cap_tra); 
+            }
+            
         }
+        sort_camiones_by_number(camiones);
+        
         
         cout<<"Rutas finales"<<endl;
+        suma_peso(camiones, cap_cam, cap_tra); 
         show_camiones(camiones);
     }
     

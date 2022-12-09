@@ -7,6 +7,7 @@
 #include<algorithm>
 #include <bits/stdc++.h>
 #include<time.h>
+#include<tuple>
 using namespace std;
 
 struct Cliente
@@ -39,8 +40,8 @@ void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones);
 Cliente select_random_int(vector<Cliente> );
 void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes);
 int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc);
-float check_peso(Camion camion);
-void suma_peso(vector<Camion> &camion);
+tuple<float,float> check_peso(Camion camion,float cap_cam, float cap_tra);
+void suma_peso(vector<Camion> &camion,float cap_cam, float cap_tra);
 void sort_camiones_max(vector<Camion> &camiones);
 void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap_cam);
 void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes);
@@ -51,3 +52,5 @@ void sort_clientes_tc_max(vector<Cliente> &tc);
 void show_clientes(vector<Cliente> clientes);
 void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Cliente> &tc);
 int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli);
+void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<float>> costos);
+void sort_camiones_by_number(vector<Camion> &camiones);

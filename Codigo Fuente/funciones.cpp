@@ -162,23 +162,31 @@ int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc){
 
     return vecino;
 }
-float check_peso(Camion camion){
+tuple<float,float> check_peso(Camion camion,float cap_cam, float cap_tra){
     float peso = 0;
+    float capacidad;
     for (auto x:camion.ruta)
     {
-        for (auto y:x)
+        for (int i = 1; i < x.size()-1; i++)
         {
-            peso = peso + y.demanda;
+            peso = peso + x[i].demanda;
         }
         
     }
-    return peso;
+    if(camion.trailer){
+        capacidad = cap_cam + cap_tra;
+    }else{
+        capacidad = cap_cam;
+    }
+    capacidad = capacidad - peso;
+    return make_tuple(peso,capacidad);
 }
 
-void suma_peso(vector<Camion> &camion){
+void suma_peso(vector<Camion> &camion,float cap_cam, float cap_tra){
     for (auto &x:camion)
     {
-        x.peso = check_peso(x);
+        x.peso = get<0>(check_peso(x, cap_cam, cap_tra));
+        x.capacidad = get<1>(check_peso(x,cap_cam, cap_tra));    
     }
 
 }
@@ -255,28 +263,7 @@ void show_camiones(vector<Camion> camiones){
 
 void mainRouteWithTc(vector<Camion> &camiones, vector<Cliente> &tc,vector<Cliente> clientes){ // ahora tengo agregado los clientes tc a los camiones sin trailer
     for(auto &camion:camiones){
-        if ((camion.capacidad>0) && (camion.trailer == 0) && (camion.ruta.size()>0))
-        {
-            if (tc.size()>0)
-            {
-                while ((camion.capacidad >=0)&&(tc.size()>0))
-                {
-                    Cliente cli= tc.back();
-                    camion.capacidad = camion.capacidad - cli.demanda;
-                    if (camion.capacidad>=0)
-                    {
-                        camion.ruta[0].insert(camion.ruta[0].begin()+camion.ruta[0].size()-1,cli);
-                        tc.erase(tc.begin()+getIndex(tc,cli));
-                    }else
-                    {   
-                        camion.capacidad = camion.capacidad + cli.demanda;
-                        break;
-                    }
-                    
-                }
-            }
-            
-        }else if ((camion.peso==0) && (camion.trailer == 0))
+        if ((camion.peso==0) && (camion.trailer == 0))
         {
         vector<Cliente> aux;
         aux.push_back(clientes[0]);
@@ -308,7 +295,7 @@ void mainRouteWithTc(vector<Camion> &camiones, vector<Cliente> &tc,vector<Client
 }
 
 void sort_clientes_tc_max(vector<Cliente> &tc){
-    sort(tc.begin(), tc.end(), [](Cliente a, Cliente b) { return a.demanda > b.demanda; });
+    sort(tc.begin(), tc.end(), [](Cliente a, Cliente b) { return a.demanda < b.demanda; });
 }
 
 void show_clientes(vector<Cliente> clientes){
@@ -326,7 +313,10 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
         if ((x.capacidad>=0)&&(x.trailer==1))
         {
             if (tc.size()!=0)
-            {
+            {   int n_subtours = 0;
+                while ((tc.size()!=0 && n_subtours<4))
+                {
+                    int i=0;
                 vector<Cliente> camiones_aux;
                 Cliente cli= tc.back(); 
                 x.capacidad = x.capacidad - cli.demanda;
@@ -335,11 +325,13 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
                 {
                     position = 1;
                 }
-                x.ruta[0].insert(x.ruta[0].begin()+position,cli);
-                tc.pop_back();
+                
                 if((x.capacidad>=0)&&(tc.size()!=0)){
+                camiones_aux.push_back(x.ruta[0][position]);
                 camiones_aux.push_back(cli);
-                int i=0;
+                tc.pop_back();
+                
+                
                 while ((x.capacidad >=0)&&(tc.size()!=0)&&(i<5))
                 {
                     Cliente cli= tc.back();
@@ -358,10 +350,15 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
                 }
                 camiones_aux.push_back(camiones_aux[0]);
                 x.ruta.push_back(camiones_aux);
+                n_subtours++;
                 }
                 else{
                     x.capacidad = x.capacidad + cli.demanda;
+                    break;
                 }
+                }
+                
+                
         
             }
             
@@ -369,6 +366,44 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
         
     }
     
+}
+
+void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<float>> costos){
+    for (auto &x:camiones)
+    {   
+        cout<<"Camion: "<<x.numero_camion<<endl;
+        if(tc.size()!=0){
+        for(auto cli:tc){
+         cli= tc.back();
+        if ((x.trailer==1)&&(cli.tipo_cliente==1))
+        {
+            if (tc.size()!=0)
+            {
+                
+                int position = most_near_client(x.ruta.back(),costos,cli);
+                if (position == 0)
+                {
+                    position = 1;
+                }
+                x.ruta.back().insert(x.ruta.back().begin()+position,cli);
+                tc.pop_back();
+            }
+            
+        }else if((x.trailer==0)){
+            if (tc.size()!=0)
+            {
+                int position = most_near_client(x.ruta[0],costos,cli);
+                if (position == 0)
+                {
+                    position = 1;
+                }
+                x.ruta[0].insert(x.ruta[0].begin()+position,cli);
+                tc.pop_back();
+            }
+        }
+        }
+    }
+    }
 }
 
 int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli){
@@ -386,5 +421,8 @@ int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, C
     return index;
 }
 
+void sort_camiones_by_number(vector<Camion> &camiones){
+    sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.numero_camion < b.numero_camion; });
+}
 
 // Hill CLimmbing con Mejor Mejora
