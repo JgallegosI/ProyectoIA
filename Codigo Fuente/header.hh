@@ -8,6 +8,7 @@
 #include <bits/stdc++.h>
 #include<time.h>
 #include<tuple>
+#include<chrono>
 using namespace std;
 
 struct Cliente
@@ -29,6 +30,11 @@ struct Camion
     float peso;
     vector<vector<Cliente>> ruta;
     int trailer=0;
+};
+
+struct Vecino{
+    vector<Camion> camiones;
+    float costo;
 };
 
 vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam, float &cap_tra, int &n_cli);
@@ -54,3 +60,10 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
 int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli);
 void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<float>> costos);
 void sort_camiones_by_number(vector<Camion> &camiones);
+float costo_ruta(vector<Camion> camiones, vector<vector<float>> costos);
+void hill_climbing(vector<Camion> camiones, vector<vector<float>> costos, vector<Cliente> clientes,float cap_cam,float cap_tra,int ITER_MAX);
+void select_best(vector<Vecino> &vecinos);
+void suma_peso_per_camion(Camion &x,float cap_cam, float cap_tra);
+bool check_factibility(Camion &camion1,float cap_cam, float cap_tra);
+void print_vecino(Vecino vecino,float cap_cam,float cap_tra);
+bool inSubRuta(vector<Cliente> RutaxCamion,Cliente cliente);

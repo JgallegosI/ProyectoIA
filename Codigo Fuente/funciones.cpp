@@ -125,7 +125,6 @@ void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<
             }else
             {   
                 camion.capacidad = camion.capacidad + cli.demanda;
-                cout<<"Capacidad sin trailer "<<camion.capacidad<<" Camion "<<camion.numero_camion<<endl;
                 break;
             }
              
@@ -190,6 +189,7 @@ void suma_peso(vector<Camion> &camion,float cap_cam, float cap_tra){
     }
 
 }
+
 
 void sort_camiones_max(vector<Camion> &camiones){
     sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.capacidad > b.capacidad; });
@@ -371,7 +371,6 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
 void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<float>> costos){
     for (auto &x:camiones)
     {   
-        cout<<"Camion: "<<x.numero_camion<<endl;
         if(tc.size()!=0){
         for(auto cli:tc){
          cli= tc.back();
@@ -426,3 +425,161 @@ void sort_camiones_by_number(vector<Camion> &camiones){
 }
 
 // Hill CLimmbing con Mejor Mejora
+void hill_climbing(vector<Camion> camiones, vector<vector<float>> costos, vector<Cliente> clientes,float cap_cam,float cap_tra,int MAX_ITER){
+    vector<Vecino> vecinos;
+    Vecino vecino, mejor_vecino;
+    vecino.camiones = camiones;
+    vecino.costo = costo_ruta(camiones,costos);
+    vecinos.push_back(vecino);
+    vector<Vecino> vecinos_aceptados;
+    int i=0;
+    while(i<MAX_ITER){
+        vector<Camion> SOL_INI = camiones;
+        float Costo_SOL_INI = costo_ruta(camiones,costos);
+        for (int j = 0; j < camiones.size(); j++)
+        {
+            for (int k = 0; k < camiones[j].ruta.size(); k++)
+            {   
+                
+                for (int l = 1; l < camiones[j].ruta[k].size()-1; l++)
+                {   
+                    
+                    for(int x =0; x<camiones.size(); x++)
+                    {
+                        for (int y = 0; y < camiones[x].ruta.size(); y++)
+                        {
+                                for (int z = 1; z < camiones[x].ruta[y].size()-1; z++)
+                                {   
+                                    vector<Camion> camiones_aux = camiones;
+                                    if ((l!=z)&&(camiones[j].ruta[k][l].tipo_cliente==1))
+                                    {   //cambio posicion de cliente tc entre subrutas
+                                            if (((y>0)||(k>0))&&(camiones_aux[x].trailer==1)&&(camiones[x].ruta[y][z].tipo_cliente==1))
+                                            {        
+                                                //cambio entre subrutas                                
+                                            swap(camiones_aux[j].ruta[k][l],camiones_aux[x].ruta[y][z]);
+                                                if (check_factibility(camiones_aux[j],cap_cam,cap_tra))
+                                                {
+                                                    vecino.camiones = camiones_aux;
+                                                    vecino.costo = costo_ruta(camiones_aux,costos);
+                                                    vecinos.push_back(vecino);
+                                                }
+                                            }else if (((y==0)||(k==0))&&((camiones_aux[x].trailer==0)||(camiones_aux[j].trailer==0)))
+                                            {   //cambio subruta con ruta
+                                                swap(camiones_aux[j].ruta[k][l],camiones_aux[x].ruta[y][z]);
+                                                if (check_factibility(camiones_aux[x],cap_cam,cap_tra))
+                                                {
+                                                    vecino.camiones = camiones_aux;
+                                                    vecino.costo = costo_ruta(camiones_aux,costos);
+                                                    vecinos.push_back(vecino);
+                                                }
+                                            }
+                                        
+                                    }else if ((l!=z)&&(camiones[j].ruta[k][l].tipo_cliente==0))
+                                    { if(inSubRuta(camiones[j].ruta[k],camiones[j].ruta[k][l]))
+                                        {
+                                            swap(camiones_aux[j].ruta[k][l],camiones_aux[x].ruta[y][z]);
+                                            if (check_factibility(camiones_aux[j],cap_cam,cap_tra))
+                                            {
+                                                vecino.camiones = camiones_aux;
+                                                vecino.costo = costo_ruta(camiones_aux,costos);
+                                                vecinos.push_back(vecino);
+                                            }
+                                            
+                                        }else
+                                        {
+                                            swap(camiones_aux[j].ruta[0][l],camiones_aux[x].ruta[0][z]);
+                                            if (check_factibility(camiones_aux[j],cap_cam,cap_tra))
+                                            {
+                                                vecino.camiones = camiones_aux;
+                                                vecino.costo = costo_ruta(camiones_aux,costos);
+                                                vecinos.push_back(vecino);
+                                            }
+                                        }
+                                        
+                                        
+
+                                    }
+                            }
+                        }
+                    }                
+                }   
+            }
+        }
+    select_best(vecinos);
+        mejor_vecino = vecinos[0];
+        if (mejor_vecino.costo > Costo_SOL_INI)
+        {
+            break;
+        }
+        vecinos_aceptados.push_back(mejor_vecino);
+        camiones = mejor_vecino.camiones;
+        i++;
+        vecinos.clear();
+}
+        
+    
+    cout<<"Solucion HCMM"<<endl;
+     cout<<"--------------------------@--------------------------"<<endl;
+    select_best(vecinos_aceptados);
+    mejor_vecino = vecinos_aceptados[0];
+    print_vecino(mejor_vecino,cap_cam,cap_tra);
+}
+
+float costo_ruta(vector<Camion> camiones, vector<vector<float>> costos){
+    float costo = 0;
+    float sobre_peso = 0;
+    for (auto x:camiones)
+    {
+        for (auto y:x.ruta)
+        {
+            for (int i = 0; i < y.size()-1; i++)
+            {
+                costo = costo + costos[y[i].numero_cliente][y[i+1].numero_cliente];
+            }
+            
+        }
+        
+    }
+
+    for(auto x:camiones){
+        if (x.capacidad < 0){
+            sobre_peso = sobre_peso + x.capacidad;
+        }
+    }
+    costo = costo + (abs(sobre_peso)*30);
+    return costo;
+}
+
+void select_best(vector<Vecino> &vecinos){
+    sort(vecinos.begin(), vecinos.end(), [](Vecino a, Vecino b) { return a.costo < b.costo; });
+}
+
+void print_vecino(Vecino vecino,float cap_cam, float cap_tra){
+    suma_peso(vecino.camiones,cap_cam,cap_tra);
+    show_camiones(vecino.camiones);
+    cout<<"Costo: "<<vecino.costo<<endl;
+}
+
+bool check_factibility(Camion &camion1,float cap_cam, float cap_tra){
+    suma_peso_per_camion(camion1,cap_cam,cap_tra);
+    if ((camion1.capacidad >=0)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+void suma_peso_per_camion(Camion &x,float cap_cam, float cap_tra){
+    
+        x.peso = get<0>(check_peso(x, cap_cam, cap_tra));
+        x.capacidad = get<1>(check_peso(x,cap_cam, cap_tra));    
+
+}
+bool inSubRuta(vector<Cliente> RutaxCamion,Cliente cliente){
+    for (auto x:RutaxCamion){
+        if (x.numero_cliente == cliente.numero_cliente){
+            return true;
+        }
+    }
+    return false;
+}
