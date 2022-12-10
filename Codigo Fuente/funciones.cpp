@@ -1,5 +1,5 @@
 #include"header.hh"
-
+// Leemos el archivo 
 vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam, float &cap_tra, int &n_cli){
     ifstream file(dir);
     string line;
@@ -30,6 +30,7 @@ vector<Cliente> Leer_arch(string dir, int &can_cam, int &can_tra, float &cap_cam
     
 }
 
+// Se obtiene las distancias entre todos los nodos
 
 vector<vector<float>> euclideanMatrix(vector<Cliente> clientes){
     vector<vector<float>> matrix;
@@ -50,7 +51,7 @@ vector<vector<float>> euclideanMatrix(vector<Cliente> clientes){
     
 }
 
-
+// Funcio de impresion de Matrices
 void show_matrix(vector<vector<float>> matrix){
     for (int i = 0; i < matrix.size() ; i++)
     {
@@ -58,12 +59,10 @@ void show_matrix(vector<vector<float>> matrix){
     {
         cout << matrix[i][j]  << "\t";
     }
-        
-    // Newline for new row
     cout << endl;
     }
 }
-
+// Obtener el indice de un elemento en un vector
 int getIndex(vector<Cliente> v, Cliente K)
 {
     for (int i = 0; i < v.size(); i++)
@@ -76,7 +75,7 @@ int getIndex(vector<Cliente> v, Cliente K)
     }
     return -1;
 }
-
+// Separar rutas por clientes
 void rutas(vector<Cliente> clientes, vector<Cliente> &vc, vector<Cliente> &tc){
     for (auto x: clientes)
     {
@@ -90,7 +89,7 @@ void rutas(vector<Cliente> clientes, vector<Cliente> &vc, vector<Cliente> &tc){
     }
     
 }
-
+// Generar camiones
 void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
     for (int i = 0; i < n_camiones; i++)
     {
@@ -101,7 +100,7 @@ void generate_truck(vector<Camion> &camiones, float capacidad, int n_camiones){
     }
     
 }
-
+// Construir rutas principales de clientes vc sin trailer
 void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
     vc.erase(vc.begin()+0);
     for (auto &camion:camiones)
@@ -139,13 +138,13 @@ void mainRouteWohutTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<
 }
 
 
-
+// Selecciona un elemento aleatorio de un vector
 Cliente select_random_int(vector<Cliente> v){
     unsigned int random = rand() % v.size();
     Cliente sel_elem = v[random];
     return sel_elem;
 }
-
+// Obtiene el numero del nodo mas cercano a un cliente tc
 int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc){
     float min = INFINITY;
     int vecino;
@@ -161,6 +160,7 @@ int minVal(vector<vector<float>> costos, int i, vector<Cliente> tc){
 
     return vecino;
 }
+// Verfica peso de los camiones
 tuple<float,float> check_peso(Camion camion,float cap_cam, float cap_tra){
     float peso = 0;
     float capacidad;
@@ -180,7 +180,7 @@ tuple<float,float> check_peso(Camion camion,float cap_cam, float cap_tra){
     capacidad = capacidad - peso;
     return make_tuple(peso,capacidad);
 }
-
+// Suma peso de los camiones
 void suma_peso(vector<Camion> &camion,float cap_cam, float cap_tra){
     for (auto &x:camion)
     {
@@ -190,15 +190,15 @@ void suma_peso(vector<Camion> &camion,float cap_cam, float cap_tra){
 
 }
 
-
+// Ordena camiones de mayor a menor capacidad
 void sort_camiones_max(vector<Camion> &camiones){
     sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.capacidad > b.capacidad; });
 }
-
+// Ordena camiones de menor a mayor capacidad
 void sort_camiones_min(vector<Camion> &camiones){
     sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.capacidad < b.capacidad; });
 }
-
+// Añade trailers de acuerdo a la capacidad de los camiones
 void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap_cam){
     for (auto &x:camiones)
     {
@@ -213,7 +213,7 @@ void add_trailer(vector<Camion> &camiones, int can_tra, float cap_tra, float cap
     }
     
 }
-
+// Ruta principal de clientes vc con trailer
 void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<Cliente> clientes){
     for (auto &camion:camiones)
     {   
@@ -241,6 +241,7 @@ void mainRouteWithTrailer(vector<Camion> &camiones,vector<Cliente> &vc, vector<C
         }
     }
 }
+// Funcion de Impresion de Camiones
 void show_camiones(vector<Camion> camiones){
     for (auto x:camiones)
     {
@@ -260,7 +261,7 @@ void show_camiones(vector<Camion> camiones){
     }
     
 }
-
+// Ruta principal de clientes tc sin trailer
 void mainRouteWithTc(vector<Camion> &camiones, vector<Cliente> &tc,vector<Cliente> clientes){ // ahora tengo agregado los clientes tc a los camiones sin trailer
     for(auto &camion:camiones){
         if ((camion.peso==0) && (camion.trailer == 0))
@@ -293,11 +294,11 @@ void mainRouteWithTc(vector<Camion> &camiones, vector<Cliente> &tc,vector<Client
         
     }
 }
-
+// Ordena clientes de mayor a menor demanda
 void sort_clientes_tc_max(vector<Cliente> &tc){
     sort(tc.begin(), tc.end(), [](Cliente a, Cliente b) { return a.demanda < b.demanda; });
 }
-
+// Funcion de Impresion de Clientes
 void show_clientes(vector<Cliente> clientes){
     for (auto x:clientes)
     {
@@ -306,7 +307,7 @@ void show_clientes(vector<Cliente> clientes){
     cout<<endl;
     
 }
-
+// Establece los subtures de los camiones con trailer
 void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Cliente> &tc){
     for (auto &x:camiones)
     {
@@ -367,7 +368,8 @@ void subtour(vector<Camion> &camiones, vector<vector<float>> costos, vector<Clie
     }
     
 }
-
+// en caso de que no se pueda agregar un cliente a un subtour se agrega a la ruta principal en una ruta tc o 
+// en un subtour con trailer
 void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<float>> costos){
     for (auto &x:camiones)
     {   
@@ -404,7 +406,7 @@ void add_client_tc(vector<Camion> &camiones, vector<Cliente> &tc, vector<vector<
     }
     }
 }
-
+// Fencion que retorna indice de cliente con menor distancia a un cliente
 int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, Cliente cli){
     int index = 0;
     float min = 999999999;
@@ -419,7 +421,7 @@ int  most_near_client(vector<Cliente> &clientes, vector<vector<float>> costos, C
     }
     return index;
 }
-
+// Funcion que ordena camiones por numero de camion
 void sort_camiones_by_number(vector<Camion> &camiones){
     sort(camiones.begin(), camiones.end(), [](Camion a, Camion b) { return a.numero_camion < b.numero_camion; });
 }
@@ -505,6 +507,7 @@ void hill_climbing(vector<Camion> camiones, vector<vector<float>> costos, vector
                 }   
             }
         }
+    // Seleccionar el mejor vecino
     select_best(vecinos);
         mejor_vecino = vecinos[0];
         if (mejor_vecino.costo > Costo_SOL_INI)
@@ -517,14 +520,15 @@ void hill_climbing(vector<Camion> camiones, vector<vector<float>> costos, vector
         vecinos.clear();
 }
         
-    
+    // Selccionar el mejor vecino de los vecinos aceptados
     cout<<"Solucion HCMM"<<endl;
      cout<<"--------------------------@--------------------------"<<endl;
     select_best(vecinos_aceptados);
     mejor_vecino = vecinos_aceptados[0];
-    print_vecino(mejor_vecino,cap_cam,cap_tra);
+    show_camiones(mejor_vecino.camiones);
+    cout<<"Costo: "<<costo_ruta(mejor_vecino.camiones,costos)<<endl;
 }
-
+// Funcion Objetivo para calcular el costo de la ruta
 float costo_ruta(vector<Camion> camiones, vector<vector<float>> costos){
     float costo = 0;
     float sobre_peso = 0;
@@ -549,17 +553,17 @@ float costo_ruta(vector<Camion> camiones, vector<vector<float>> costos){
     costo = costo + (abs(sobre_peso)*30);
     return costo;
 }
-
+// Selecciona Mejor Vecino
 void select_best(vector<Vecino> &vecinos){
     sort(vecinos.begin(), vecinos.end(), [](Vecino a, Vecino b) { return a.costo < b.costo; });
 }
-
+// Muestra solucion HCMM
 void print_vecino(Vecino vecino,float cap_cam, float cap_tra){
     suma_peso(vecino.camiones,cap_cam,cap_tra);
     show_camiones(vecino.camiones);
     cout<<"Costo: "<<vecino.costo<<endl;
 }
-
+// Chequea si vecino es factible
 bool check_factibility(Camion &camion1,float cap_cam, float cap_tra){
     suma_peso_per_camion(camion1,cap_cam,cap_tra);
     if ((camion1.capacidad >=0)){
@@ -569,12 +573,14 @@ bool check_factibility(Camion &camion1,float cap_cam, float cap_tra){
         return false;
     }
 }
+// Suma peso de cada camion
 void suma_peso_per_camion(Camion &x,float cap_cam, float cap_tra){
     
         x.peso = get<0>(check_peso(x, cap_cam, cap_tra));
         x.capacidad = get<1>(check_peso(x,cap_cam, cap_tra));    
 
 }
+// Chequea si nodo es raiz de subruta
 bool inSubRuta(vector<Cliente> RutaxCamion,Cliente cliente){
     for (auto x:RutaxCamion){
         if (x.numero_cliente == cliente.numero_cliente){

@@ -14,7 +14,6 @@ int main(int argc, char const *argv[])
     chrono::time_point<chrono::system_clock> start, end;
     //Calculo matriz de costos
     vector<vector<float>> costs = euclideanMatrix(clientes);
-    cout<<"Inicio Algoritmo"<<endl;
     start = chrono::system_clock::now();
     generate_truck(camiones,cap_cam,can_cam);
     //Separacion de clientes or tc y vc
@@ -49,8 +48,10 @@ int main(int argc, char const *argv[])
         }
         sort_camiones_by_number(camiones);
         cout<<"Rutas Iniciales"<<endl;
+         cout<<"--------------------------@--------------------------"<<endl;
+         show_camiones(camiones);
         cout<<"Costo total: "<<costo_ruta(camiones,costs)<<endl;
-        show_camiones(camiones);
+        
     }else{
         
         sort_clientes_tc_max(tc);
@@ -79,9 +80,10 @@ int main(int argc, char const *argv[])
         
         cout<<"Rutas Iniciales"<<endl;
         cout<<"--------------------------@--------------------------"<<endl;
-        suma_peso(camiones, cap_cam, cap_tra); 
+        suma_peso(camiones, cap_cam, cap_tra);
+        show_camiones(camiones); 
         cout<<"Costo total: "<<costo_ruta(camiones,costs)<<endl;
-        show_camiones(camiones);
+        
     }
     
     hill_climbing(camiones,costs,clientes,cap_cam,cap_tra,stoi(argv[2]));
